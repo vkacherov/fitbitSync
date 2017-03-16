@@ -1,0 +1,23 @@
+{
+  "name": "fitbitSync",
+  "version": "1.0.0",
+  "description": "Azure Function to sync the Fitbit user telemetry from the Fitbit cloud to a remote data store",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "microsoft",
+    "azure",
+    "function",
+    "fitbit"
+  ],
+  "author": "Vadim Kacherov (https://github.com/vkacherov)",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.12.0",
+    "promise": "^7.1.1",
+    "moment": "^2.14.1",
+    "azure-functions-auth0": "~1.0.0"
+  }
+}
