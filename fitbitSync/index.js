@@ -1,3 +1,21 @@
+// Fitbit URLs
+const fitbitBaseUrl = "https://api.fitbit.com/1/user/-/";
+const fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize";
+
+// Fitbit access metadata   
+const clientId = GetEnvironmentVariable('clientId');
+const clientSecret = GetEnvironmentVariable('clientSecret');
+
+const auth0 = require('azure-functions-auth0')({
+	clientId: clientId,
+	clientSecret: clientSecret,
+	domain: fitbitAuthUrl
+});
+
+function GetEnvironmentVariable(name) {
+	return process.env[name];
+}
+
 /**
  * Azure Function that is periodically invoked to synchronize the Fitbit 
  * user telemetry with the data store on Azure. The function retrieves 
@@ -7,55 +25,33 @@
  * @param  context - execution context of the function  
  * @param event - Azure function object containing event data 
  */
-
-module.exports = function (context, myTimer) {
+module.exports = auth0(function(context, myTimer, req) { 
 	"use strict";
-
-	// Fitbit URLs
-	const fitbitBaseUrl = "https://api.fitbit.com/1/user/-/";
-	const fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize";
-
-	// Fitbit access metadata   
-	const clientId = GetEnvironmentVariable('clientId');
-	const clientSecret = GetEnvironmentVariable('clientSecret');
-
-	const auth0 = require('azure-functions-auth0')({
-		clientId: clientId,
-		clientSecret: clientSecret,
-		domain: fitbitAuthUrl
-	});
 
 	// Load the axios http lib.
 	const axios = require('axios');
 	// Promise lib.
 	const promise = require('promise');
 
-	auth0(function (context, req) {
-		context.log('Node.js HTTP trigger function processed a request. RequestUri=%s', req.originalUrl);
+	context.log('Node.js HTTP trigger function processed a request. RequestUri=%s', req.originalUrl);
 
-		if (req.user) {
-			context.res = {
-				body: req.user
-			};
-		}
-		else {
-			context.res = {
-				status: 400,
-				body: "The user seems to be missing"
-			};
-		}
-		context.done();
-	});
-
+	if (req.user) {
+		context.res = {
+			body: req.user
+		};
+	}
+	else {
+		context.res = {
+			status: 400,
+			body: "The user seems to be missing"
+		};
+	}
+	
 	var timeStamp = new Date().toISOString();
 	context.log('JavaScript timer trigger function ran!', timeStamp);
 
 	context.done();
-};
-
-function GetEnvironmentVariable(name) {
-	return process.env[name];
-}
+});
 
 /**
  * Determines the user's time offset from UTC in milliseconds. This allows us to normalized
