@@ -25,7 +25,7 @@ function GetEnvironmentVariable(name) {
  * @param  context - execution context of the function  
  * @param event - Azure function object containing event data 
  */
-module.exports = auth0(function(context, myTimer, req) { 
+module.exports = auth0(function(context, req) { 
 	"use strict";
 
 	// Load the axios http lib.
