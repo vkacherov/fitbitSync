@@ -1,37 +1,11 @@
-## Welcome to GitHub Pages
+# Telemetry Sync Service 
 
-You can use the [editor on GitHub](https://github.com/vkacherov/fitbitSync/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Labrat is a Clinical Study platform that enables the management of health-related interventions that are targeted to evaluate health effects and outcomes for a specific control group of participants. The platform facilitates resource scheduling, participant and equipment management, as well as device data and telemetry storage configuration.
+ 
+The Telemetry Sync Service (TSS) handles the scheduling and telemetry sync with the 3rd party APIs.
 
-### Markdown
+## How it works
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+TSS provides a set of **<a href="https://azure.microsoft.com/en-us/services/functions/" target="_blank">Azure Functions</a>** that are executed on a configurable schedule. For a `TimerTrigger` to work, you provide a schedule in the form of a [cron expression](https://en.wikipedia.org/wiki/Cron#CRON_expression)(See the link for full details). A cron expression is a string with 6 separate expressions which represent a given schedule via patterns. The pattern we use to represent every 5 minutes is `0 */5 * * * *`. This, in plain text, means: "When seconds is equal to 0, minutes is divisible by 5, for any hour, day of the month, month, day of the week, or year".
 
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/vkacherov/fitbitSync/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
