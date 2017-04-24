@@ -11,106 +11,64 @@
 module.exports = function (context, myTimer) {
 	"use strict";
 
-	// Fitbit URLs
-	const fitbitBaseUrl = "https://api.fitbit.com/1/user/-/";
-	const fitbitAuthUrl = "https://www.fitbit.com/oauth2/authorize";
+	const express = require('express'),
+		app = express(),
+		path = require('path'),
+		connect = require('connect'),
+		traverse = require('traverse'),
+		moment = require('moment'),
+		_ = require('lodash'),
+		_inRange = require('lodash.inrange'),
+		getConfig = require('./getConfig'),
+		exportCsv = _.curry(require('./exportCsv'))(app),
+		auth = require('./auth'),
+		passport = require('passport');
+		
+		app.use(connect.cookieParser());
+		app.use(connect.session({secret: getConfig(app).sessionSecret}));
+		app.use(passport.initialize());
+		app.use(passport.session());
 
-	// Fitbit access metadata   
-	const clientId = GetEnvironmentVariable('clientId');
-	const clientSecret = GetEnvironmentVariable('clientSecret');
+		app.get('/', function(req, res, next) {
+			var userPath = ['session', 'passport', 'user'],
+				traverseReq = traverse(req),
+				userExists = traverseReq.has(userPath),
+				user = userExists && traverseReq.get(userPath);
 
-	const auth0 = require('azure-functions-auth0')({
-		clientId: clientId,
-		clientSecret: clientSecret,
-		domain: fitbitAuthUrl
-	});
+			res.json({
+				user
+			});
+			var timeStamp = new Date().toISOString();
+			context.log('User: ', user);
+		});
 
-	// Load the axios http lib.
-	const axios = require('axios');
-	// Promise lib.
-	const promise = require('promise');
+		app.get('/diagnostics.json', function(req, res) {
+			res.json({
+				appVersion, 
+				nodeJsVersion: process.version
+			});
+		});
 
-	auth0(function (context, req) {
-		context.log('Node.js HTTP trigger function processed a request. RequestUri=%s', req.originalUrl);
+		app.get('/export.csv', exportCsv);
 
-		if (req.user) {
-			context.res = {
-				body: req.user
-			};
-		}
-		else {
-			context.res = {
-				status: 400,
-				body: "The user seems to be missing"
-			};
-		}
+		app.get('/auth-error', (req, res) => {
+			var errorMsg = 'Authenticating with FitBit failed.';
+			res.status(500);
+			res.json(errorMsg);
+			context.log(errorMsg);
+		});
+
+		app.use((err, req, res, next) => {
+			if (err) {
+				res.status(500);
+				//res.render('error.ejs', {err, isFitbitProblem: _inRange(err.statusCode, 500, 600)});
+			}
+		});
+
+		auth(app);
+
+		var timeStamp = new Date().toISOString();
+		context.log('JavaScript timer trigger function ran!', timeStamp);
+
 		context.done();
-	});
-
-	var timeStamp = new Date().toISOString();
-	context.log('JavaScript timer trigger function ran!', timeStamp);
-
-	context.done();
 };
-
-function GetEnvironmentVariable(name) {
-	return process.env[name];
-}
-
-/**
- * Determines the user's time offset from UTC in milliseconds. This allows us to normalized
- * the local time with the device's timezone. (at least the last recorded timezone)
- * @return the UTC offset in milliseconds
- */
-function getFitbitProfileUTCOffset() {
-	return axios({
-		url: fitbitBaseUrl + "profile.json",
-		method: 'GET',
-		headers: {
-			'Authorization': 'Bearer ' + accessToken
-		}
-	}).then(response => {
-		let offsetFromUTCMillis = response.data.user.offsetFromUTCMillis
-		console.log("User's UTC offest in milliseconds is: " + offsetFromUTCMillis);
-		return offsetFromUTCMillis;
-	}).catch(error => {
-		throw error;
-	});
-}
-
-
-/**
- * Get the intraday steps for the current user using the input UTC offet
- */
-function getIntradaySteps(offsetFromUTCMillis) {
-	// Moment.js library
-	const moment = require('moment')
-
-	//Get the current date/time and offset based on the Fitbit user's profile
-	let now = moment();
-	now.add(offsetFromUTCMillis, 'ms');
-
-	//Format date range values
-	let hourString = now.get('hour');
-	let dateString = now.format("YYYY-MM-DD");
-
-	//URL to fetch data for the current hour
-	let url = fitbitBaseUrl + `activities/steps/date/${dateString}/1d/15min/time/${hourString}:00/${hourString}:59.json`;
-
-	//Fetch the data from Fitbit
-	console.log("Invoking Fitbit endpoint at: " + url);
-
-	return axios({
-		url: url,
-		method: 'GET',
-		headers: {
-			'Authorization': 'Bearer ' + accessToken
-		}
-	}).then(response => {
-		console.log("Returned payload: \n" + JSON.stringify(response.data["activities-steps-intraday"]));
-		let dataset = response.data["activities-steps-intraday"].dataset;
-		return dataset;
-	}).catch(error => {
-		throw error;
-	});
-}
