@@ -11,13 +11,13 @@
       "type": "httpTrigger",
       "direction": "in"
     },{
-      "name": "auth",
+      "name": "req",
       "type": "httpTrigger",
       "direction": "in",
       "methods": [ "GET" ],
       "route": "auth/fitbit"
     },{
-      "name": "authCallback",
+      "name": "req",
       "type": "httpTrigger",
       "direction": "in",
       "methods": [ "GET" ],
