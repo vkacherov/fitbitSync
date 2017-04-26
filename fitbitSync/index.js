@@ -49,15 +49,15 @@ const callbackUrl = url.format({
 });
 
 // Authenticate the app
-app.get('/auth/fitbit', (req, res) => {
-	req.context.log('Auth fitbit cloud init', timeStamp);
+app.get('/auth/fitbit', (auth, res) => {
+	auth.context.log('Auth fitbit cloud init', timeStamp);
 	passport.authenticate('fitbit', { 
 		scope: ['activity', 'profile', 'sleep', 'weight', 'nutrition']
 	})
 });
 
-app.get(callbackPath, (req,res) => {
-	req.context.log('Auth fitbit cloud callback', timeStamp);
+app.get(callbackPath, (authCallback,res) => {
+	authCallback.context.log('Auth fitbit cloud callback', timeStamp);
 	passport.authenticate('fitbit', { 
 		successRedirect: '/',
 		failureRedirect: '/auth-error'
