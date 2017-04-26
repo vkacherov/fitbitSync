@@ -5,14 +5,24 @@
       "type": "timerTrigger",
       "direction": "in",
       "schedule": "0 */15 * * * *"
-    },
-    {
+    },{
+      "name": "req",
       "webHookType": "",
       "type": "httpTrigger",
+      "direction": "in"
+    },{
+      "name": "auth",
+      "type": "httpTrigger",
       "direction": "in",
-      "name": "req"
-    },
-    {
+      "methods": [ "GET" ],
+      "route": "auth/fitbit"
+    },{
+      "name": "authCallback",
+      "type": "httpTrigger",
+      "direction": "in",
+      "methods": [ "GET" ],
+      "route": "auth/fitbit/callback"
+    },{
       "type": "http",
       "direction": "out",
       "name": "res"
