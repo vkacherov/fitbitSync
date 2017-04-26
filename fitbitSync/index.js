@@ -11,6 +11,7 @@
 module.exports = function (context, myTimer) {
 	"use strict";
 
+	var timeStamp = new Date().toISOString();
 	const express = require('express'),
 		app = express(),
 		path = require('path'),
@@ -29,45 +30,12 @@ module.exports = function (context, myTimer) {
 		app.use(passport.initialize());
 		app.use(passport.session());
 
-		app.get('/', function(req, res, next) {
-			var userPath = ['session', 'passport', 'user'],
-				traverseReq = traverse(req),
-				userExists = traverseReq.has(userPath),
-				user = userExists && traverseReq.get(userPath);
+		// Authenticate the app
+		auth(app, context);
 
-			res.json({
-				user
-			});
-			var timeStamp = new Date().toISOString();
-			context.log('User: ', user);
-		});
+		// Get the data
+		//exportCsv(context, app);
 
-		app.get('/diagnostics.json', function(req, res) {
-			res.json({
-				appVersion, 
-				nodeJsVersion: process.version
-			});
-		});
-
-		app.get('/export.csv', exportCsv);
-
-		app.get('/auth-error', (req, res) => {
-			var errorMsg = 'Authenticating with FitBit failed.';
-			res.status(500);
-			res.json(errorMsg);
-			context.log(errorMsg);
-		});
-
-		app.use((err, req, res, next) => {
-			if (err) {
-				res.status(500);
-				//res.render('error.ejs', {err, isFitbitProblem: _inRange(err.statusCode, 500, 600)});
-			}
-		});
-
-		auth(app);
-
-		var timeStamp = new Date().toISOString();
 		context.log('JavaScript timer trigger function ran!', timeStamp);
 
 		context.done();

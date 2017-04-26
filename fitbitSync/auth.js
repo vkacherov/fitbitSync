@@ -5,10 +5,13 @@ var passport = require('passport'),
     url = require('url'),
     FitbitOAuth2Strategy = require('passport-fitbit-oauth2').FitbitOAuth2Strategy;
 
-function auth(app) {
+function auth(app, context) {
     const config = getConfig(app),
         callbackPath = '/auth/fitbit/callback';
-
+    var timeStamp = new Date().toISOString();
+	
+    context.log("Auth init ",timeStamp);
+    
     app.get('/auth/fitbit', passport.authenticate('fitbit', { scope: ['activity', 'profile', 'sleep', 'weight', 'nutrition']}));
     app.get(
         callbackPath,
@@ -38,7 +41,7 @@ function auth(app) {
         clientSecret: config.fitbitClientSecret,
         callbackUrl: callbackUrl
     }, function(accessToken, refreshToken, profile, done) {
-        logger.info({profileId: profile.id, profileDisplayName: profile.displayName}, 'Logged in user');
+        context.log({profileId: profile.id, profileDisplayName: profile.displayName}, 'Logged in user');
 
         profile.accessToken = accessToken;
         profile.refreshToken = refreshToken;
